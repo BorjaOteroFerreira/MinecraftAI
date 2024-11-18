@@ -1,0 +1,6 @@
+name: NPCAI
+version: 1.0
+main: es.zit0.plugin.Main
+api-version: '1.21'
+depend: [Citizens]
+description: NPC AI using LLM for decision making

@@ -1,0 +1,27 @@
+# Configuración del plugin ZombieAI
+
+# Intervalo de decisión en ticks (20 ticks = 1 segundo)
+decision-interval: 50
+
+# Configuración de IA
+ai:
+  # Radio de exploración máximo
+  exploration-radius: 20
+  # Radio de detección de jugadores
+  player-detection-radius: 10
+  # Radio de detección de bloques
+  block-detection-radius: 5
+
+# Configuración de necesidades
+needs:
+  # Tasa de reducción de necesidades (por ciclo)
+  reduction-rate: 1
+  # Tasa de recuperación al descansar
+  rest-recovery-rate: 5
+  # Tasa de recuperación social
+  social-recovery-rate: 2
+
+# Configuración de memoria
+memory:
+  # Número máximo de memorias recientes
+  max-recent-memories: 10

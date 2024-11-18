@@ -1,0 +1,4 @@
+*.txt
+*.gz
+logs/*
+logs

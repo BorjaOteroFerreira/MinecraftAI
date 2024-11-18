@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos de Minecraft</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        ul {
+            list-style-type: none;
+        }
+        li {
+            margin: 5px 0;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        /* Estilo del menú */
+        nav {
+            margin-bottom: 20px;
+            background-color: #34495e;
+            padding: 10px;
+        }
+        nav a {
+            color: #ecf0f1;
+            padding: 10px;
+            text-decoration: none;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+        nav a:hover {
+            background-color: #2c3e50;
+        }
+        /* Estilo de las secciones */
+        section {
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Eventos de Minecraft</h1>
+
+    <!-- Menú de navegación -->
+    <nav>
+        <a href="#bloques">Bloques</a>
+        <a href="#encantamientos">Encantamientos</a>
+        <a href="#entidades">Entidades</a>
+        <a href="#inventario">Inventario</a>
+        <a href="#jugadores">Jugadores</a>
+        <a href="#servidor">Servidor</a>
+        <a href="#vehiculos">Vehículos</a>
+        <a href="#clima">Clima</a>
+        <a href="#mundo">Mundo</a>
+    </nav>
+
+    <!-- Sección de Bloques -->
+    <section id="bloques">
+        <h2>Bloques</h2>
+        <ul>
+            <li><strong>BlockBreakEvent</strong> - Se llama cuando un bloque se rompe.</li>
+            <li><strong>BlockBurnEvent</strong> - Se llama cuando un bloque se quema.</li>
+            <li><strong>BlockCanBuildEvent</strong> - Se llama cuando intentamos colocar un bloque para verificar si se puede construir allí.</li>
+            <li><strong>BlockDamageEvent</strong> - Se llama cuando un bloque es dañado por un jugador.</li>
+            <li><strong>BlockDispenseEvent</strong> - Se llama cuando un objeto es dispensado de un bloque.</li>
+            <li><strong>BlockEvent</strong> - Representa un evento relacionado con bloques.</li>
+            <li><strong>BlockFadeEvent</strong> - Se llama cuando un bloque se desvanece, se derrite o desaparece debido a las condiciones del mundo.</li>
+            <li><strong>BlockFormEvent</strong> - Se llama cuando un bloque se forma o se expande debido a las condiciones del mundo.</li>
+            <li><strong>BlockFromToEvent</strong> - Representa eventos con un bloque fuente y un bloque de destino, solo se aplica a líquidos y a huevos de dragón que se teletransportan.</li>
+            <li><strong>BlockGrowEvent</strong> - Se llama cuando un bloque crece de manera natural en el mundo.</li>
+            <li><strong>BlockIgniteEvent</strong> - Se llama cuando un bloque se enciende.</li>
+            <li><strong>BlockPhysicsEvent</strong> - Se lanza cuando se realiza una comprobación de física de bloques.</li>
+            <li><strong>BlockPistonEvent</strong> - ??</li>
+            <li><strong>BlockPistonExtendEvent</strong> - ??</li>
+            <li><strong>BlockPistonRetractEvent</strong> - ??</li>
+            <li><strong>BlockPlaceEvent</strong> - Se llama cuando un jugador coloca un bloque.</li>
+            <li><strong>BlockRedstoneEvent</strong> - Se llama cuando un bloque es alimentado por redstone o cambia la corriente de redstone.</li>
+            <li><strong>BlockSpreadEvent</strong> - Se llama cuando un bloque se expande debido a las condiciones del mundo.</li>
+            <li><strong>EntityBlockFormEvent</strong> - Se llama cuando un bloque es formado por entidades.</li>
+            <li><strong>LeavesDecayEvent</strong> - Se llama cuando las hojas se decaen de forma natural.</li>
+            <li><strong>NotePlayEvent</strong> - Se llama cuando se reproduce un bloque de notas a través de la interacción de un jugador o una corriente de redstone.</li>
+            <li><strong>SignChangeEvent</strong> - Se llama cuando un jugador cambia un cartel.</li>
+        </ul>
+    </section>
+
+    <!-- Sección de Encantamientos -->
+    <section id="encantamientos">
+        <h2>Encantamientos</h2>
+        <ul>
+            <li><strong>EnchantItemEvent</strong> - Se llama cuando un objeto es encantado con éxito en una mesa de encantamientos.</li>
+            <li><strong>PrepareItemEnchantEvent</strong> - Se llama cuando un objeto es insertado en una mesa de encantamientos, puede activarse múltiples veces.</li>
+        </ul>
+    </section>
+
+    <!-- Sección de Entidades -->
+    <section id="entidades">
+        <h2>Entidades</h2>
+        <ul>
+            <li><strong>CreatureSpawnEvent</strong> - Se llama cuando una criatura es generada en el mundo.</li>
+            <li><strong>CreeperPowerEvent</strong> - Se llama cuando un Creeper es alcanzado por un rayo y se vuelve supercargado.</li>
+            <li><strong>EntityBreakDoorEvent</strong> - Se llama cuando una entidad rompe una puerta.</li>
+            <li><strong>EntityChangeBlockEvent</strong> - Se llama cuando una entidad viviente cambia un bloque.</li>
+            <li><strong>EntityCombustByBlockEvent</strong> - ??</li>
+            <li><strong>EntityCombustByEntityEvent</strong> - ??</li>
+            <li><strong>EntityCombustEvent</strong> - Se llama cuando una entidad se prende fuego (o se quema).</li>
+            <li><strong>EntityCreatePortalEvent</strong> - Se lanza cuando una entidad viviente crea un portal en el mundo.</li>
+            <li><strong>EntityDamageByBlockEvent</strong> - Se llama cuando una entidad es dañada por un bloque.</li>
+            <li><strong>EntityDamageByEntityEvent</strong> - Se llama cuando una entidad es dañada por otra entidad.</li>
+            <li><strong>EntityDamageEvent</strong> - Almacena los datos de eventos de daño.</li>
+            <li><strong>EntityDeathEvent</strong> - Se lanza cuando una entidad viviente muere.</li>
+            <li><strong>EntityEvent</strong> - Representa un evento relacionado con una entidad.</li>
+            <li><strong>EntityExplodeEvent</strong> - Se llama cuando una entidad explota.</li>
+            <li><strong>EntityInteractEvent</strong> - Se llama cuando una entidad interactúa con un objeto.</li>
+            <li><strong>EntityMakeLoveEvent</strong> - Se llama cuando una entidad se reproduce con otra entidad.</li>
+            <li><strong>EntityPortalEnterEvent</strong> - Almacena los datos de las entidades dentro de un portal.</li>
+            <li><strong>EntityRegainHealthEvent</strong> - Almacena los datos para eventos de recuperación de salud.</li>
+            <li><strong>EntityShootBowEvent</strong> - Se llama cuando una entidad viviente dispara un arco, lanzando una flecha.</li>
+            <li><strong>EntityTameEvent</strong> - Se lanza cuando una entidad viviente es domesticada.</li>
+            <li><strong>EntityTargetEvent</strong> - Se llama cuando una criatura selecciona o deselecciona otra entidad.</li>
+            <li><strong>EntityTargetLivingEntityEvent</strong> - Se llama cuando una entidad selecciona a una entidad viviente como objetivo (y solo puede ser un objetivo viviente).</li>
+            <li><strong>EntityTeleportEvent</strong> - Se lanza cuando una entidad no jugadora (como un Enderman) intenta teletransportarse de un lugar a otro.</li>
+            <li><strong>ExpBottleEvent</strong> - Se llama cuando una botella de experiencia lanzada golpea y libera experiencia.</li>
+            <li><strong>ExplosionPrimeEvent</strong> - Se llama cuando una entidad decide explotar (como TNT o un creeper).</li>
+            <li><strong>FoodLevelChangeEvent</strong> - Se llama cuando el nivel de comida de una entidad humana cambia.</li>
+            <li><strong>ItemDespawnEvent</strong> - Se llama cuando un objeto desaparece del mundo.</li>
+            <li><strong>PigZapEvent</strong> - Se llama cuando un cerdo es alcanzado por un rayo y se convierte en un cerdo zombi.</li>
+            <li><strong>ProjectileHitEvent</strong> - Se llama cuando un proyectil (flecha, bola de nieve, etc.) impacta en una entidad o bloque.</li>
+        </ul>
+    </section>
+
+    <!-- Sección de Inventario -->
+    <section id="inventario">
+        <h2>Inventario</h2>
+        <ul>
+            <li><strong>InventoryClickEvent</strong> - Se lanza cuando un jugador interactúa con un inventario (como un cofre, mesa de trabajo, etc.).</li>
+            <li><strong>InventoryDragEvent</strong> - ??</li>
+            <li><strong>InventoryOpenEvent</strong> - Se llama cuando se abre un inventario.</li>
+            <li><strong>InventoryPickupItemEvent</strong> - Se lanza cuando un jugador recoge un objeto del suelo o de un cofre.</li>
+        </ul>
+    </section>
+
+    <!-- Sección de Jugadores -->
+    <section id="jugadores">
+        <h2>Jugadores</h2>
+        <ul>
+            <li><strong>PlayerChangedWorldEvent</strong> - Se llama cuando un jugador cambia de mundo.</li>
+            <li><strong>PlayerInteractEvent</strong> - ??</li>
+            <li><strong>PlayerJoinEvent</strong> - Se llama cuando un jugador entra al servidor.</li>
+            <li><strong>PlayerLoginEvent</strong> - Se llama cuando un jugador intenta iniciar sesión.</li>
+            <li><strong>PlayerMoveEvent</strong> - Se llama cuando un jugador se mueve.</li>
+            <li><strong>PlayerPortalEvent</strong> - Se llama cuando un jugador entra o está dentro de un portal.</li>
+            <li><strong>PlayerPreLoginEvent</strong> - Almacena detalles de los jugadores que intentan iniciar sesión.</li>
+            <li><strong>PlayerQuitEvent</strong> - Se llama cuando un jugador deja el servidor.</li>
+            <li><strong>PlayerRegisterChannelEvent</strong> - Se llama cuando un jugador registra un canal de plugin.</li>
+            <li><strong>PlayerRespawnEvent</strong> - Se llama cuando un jugador respawnea.</li>
+            <li><strong>PlayerShearEntityEvent</strong> - Se llama cuando un jugador esquila una entidad, como una oveja.</li>
+            <li><strong>PlayerTeleportEvent</strong> - Contiene información sobre eventos de teletransportación de jugadores.</li>
+            <li><strong>PlayerToggleFlightEvent</strong> - Se llama cuando un jugador cambia su estado de vuelo.</li>
+            <li><strong>PlayerToggleSneakEvent</strong> - Se llama cuando un jugador cambia su estado de agacharse.</li>
+            <li><strong>PlayerToggleSprintEvent</strong> - Se llama cuando un jugador cambia su estado de correr.</li>
+            <li><strong>PlayerUnregisterChannelEvent</strong> - Se llama cuando un jugador desregistra un canal de plugin.</li>
+            <li><strong>PlayerVelocityEvent</strong> - ??</li>
+        </ul>
+    </section>
+
+    <!-- Sección de Servidor -->
+    <section id="servidor">
+        <h2>Servidor</h2>
+        <ul>
+            <li><strong>MapInitializeEvent</strong> - Se llama cuando un mapa se carga.</li>
+            <li><strong>PluginDisableEvent</strong> - Se llama cuando un plugin es desactivado.</li>
+            <li><strong>PluginEnableEvent</strong> - Se llama cuando un plugin es activado.</li>
+            <li><strong>PluginEvent</strong> - Se usa para eventos de activación/desactivación de plugins.</li>
+            <li><strong>RemoteServerCommandEvent</strong> - ??</li>
+            <li><strong>ServerCommandEvent</strong> - ??</li>
+            <li><strong>ServerEvent</strong> - Eventos misceláneos del servidor.</li>
+            <li><strong>ServerListPingEvent</strong> - Se llama cuando un ping a la lista de servidores llega.</li>
+            <li><strong>ServiceEvent</strong> - Un evento relacionado con un servicio registrado.</li>
+            <li><strong>ServiceRegisterEvent</strong> - Se llama cuando se registra un servicio.</li>
+            <li><strong>ServiceUnregisterEvent</strong> - Se llama cuando se desregistra un servicio.</li>
+        </ul>
+    </section>
+
+    <!-- Sección de Vehículos -->
+    <section id="vehiculos">
+        <h2>Vehículos</h2>
+        <ul>
+            <li><strong>VehicleBlockCollisionEvent</strong> - Se activa cuando un vehículo colisiona con un bloque.</li>
+            <li><strong>VehicleCollisionEvent</strong> - Se activa cuando un vehículo colisiona.</li>
+            <li><strong>VehicleCreateEvent</strong> - Se activa cuando un vehículo es creado.</li>
+            <li><strong>VehicleDamageEvent</strong> - Se activa cuando un vehículo recibe daño de cualquier fuente.</li>
+            <li><strong>VehicleDestroyEvent</strong> - Se activa cuando un vehículo es destruido por cualquier causa, ya sea natural o por un jugador.</li>
+            <li><strong>VehicleEnterEvent</strong> - Se activa cuando una entidad entra en un vehículo.</li>
+            <li><strong>VehicleEntityCollisionEvent</strong> - Se activa cuando un vehículo colisiona con una entidad.</li>
+            <li><strong>VehicleEvent</strong> - Representa un evento relacionado con vehículos.</li>
+            <li><strong>VehicleExitEvent</strong> - Se activa cuando una entidad viviente sale de un vehículo.</li>
+            <li><strong>VehicleMoveEvent</strong> - Se activa cuando un vehículo se mueve.</li>
+            <li><strong>VehicleUpdateEvent</strong> - Se llama cuando un vehículo se actualiza (?).</li>
+        </ul>
+    </section>
+
+    <!-- Sección de Clima -->
+    <section id="clima">
+        <h2>Clima</h2>
+        <ul>
+            <li><strong>LightningStrikeEvent</strong> - Almacena datos para cuando un rayo golpea.</li>
+            <li><strong>ThunderChangeEvent</strong> - Almacena datos para el cambio del estado de los truenos en un mundo.</li>
+            <li><strong>WeatherChangeEvent</strong> - Almacena datos para cuando cambia el clima en un mundo.</li>
+            <li><strong>WeatherEvent</strong> - Representa un evento relacionado con el clima.</li>
+        </ul>
+    </section>
+
+    <!-- Sección de Mundo -->
+    <section id="mundo">
+        <h2>Mundo</h2>
+        <ul>
+            <li><strong>ChunkEvent</strong> - Representa un evento relacionado con un Chunk.</li>
+            <li><strong>ChunkLoadEvent</strong> - Se llama cuando un Chunk es cargado.</li>
+            <li><strong>ChunkPopulateEvent</strong> - Se lanza cuando un nuevo Chunk ha terminado de poblarse.</li>
+            <li><strong>ChunkUnloadEvent</strong> - Se llama cuando un Chunk es descargado.</li>
+            <li><strong>PortalCreateEvent</strong> - Se llama cuando un portal es creado.</li>
+            <li><strong>SpawnChangeEvent</strong> - Se llama cuando el punto de aparición del mundo cambia.</li>
+            <li><strong>StructureGrowEvent</strong> - Se llama cuando una estructura orgánica intenta crecer (ejemplo: árbol o hongo gigante) de forma natural o utilizando abono.</li>
+            <li><strong>WorldEvent</strong> - Representa eventos dentro de un mundo.</li>
+            <li><strong>WorldInitEvent</strong> - Se llama cuando un mundo está inicializándose.</li>
+            <li><strong>WorldLoadEvent</strong> - Se llama cuando un mundo es cargado.</li>
+            <li><strong>WorldSaveEvent</strong> - Se llama cuando un mundo es guardado.</li>
+            <li><strong>WorldUnloadEvent</strong> - Se llama cuando un mundo es descargado.</li>
+        </ul>
+    </section>
+
+</body>
+</html>

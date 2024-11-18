@@ -1,0 +1,47 @@
+plugins {
+    id "java"
+    id "com.github.johnrengelman.shadow" version "8.1.0"
+}
+
+repositories {
+    flatDir {
+        dirs "lib"
+    }
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://repo.citizensnpcs.co/repository/maven-public/' }
+
+    maven {
+        url = "https://repo.aikar.co/content/groups/aikar/"
+    }
+    maven {
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots"
+    }
+    maven {
+        url = "https://hub.spigotmc.org/nexus/content/groups/public/"
+    }
+    maven {
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+}
+
+dependencies {
+    // Citizens desde la carpeta lib o desde Jenkins (version más reciente)  
+    compileOnly name: 'citizens-2.0.36-SNAPSHOT' 
+    compileOnly name: 'citizens-v1_21_R2-2.0.36-SNAPSHOT'
+
+    // Spigot API desde Maven Central (o Repositorio Spigot)
+    implementation name: 'spigot-api', version: '1.21.3-R0.1-SNAPSHOT'
+    // Gson desde Maven Central
+    implementation 'com.google.code.gson:gson:2.11.0'
+
+}
+
+// Configuraciones adicionales de Gradle
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    options.encoding = "UTF-8"
+}
