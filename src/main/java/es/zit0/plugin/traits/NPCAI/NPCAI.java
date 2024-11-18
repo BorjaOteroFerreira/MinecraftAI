@@ -1,9 +1,8 @@
 package es.zit0.plugin.traits.NPCAI;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 import es.zit0.plugin.Main;
+import es.zit0.plugin.ai.AIResponseBuilder;
 import es.zit0.plugin.chat.ChatMessage;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
@@ -29,6 +28,7 @@ public class NPCAI extends Trait {
     private NPCContext context;
     private boolean isActive = false;
     private static final Map<String, List<ChatMessage>> globalChatHistory = new HashMap<>();
+    
    
     
     public NPCAI() {
@@ -188,57 +188,61 @@ public class NPCAI extends Trait {
 
     @SuppressWarnings("unused")
     private void handleLLMResponse(String response) {
-        if (response.startsWith("HABLAR ")) {
-            String message = response.substring(7).trim();
-            globalChatHistory.computeIfAbsent(npc.getName(), k -> new ArrayList<>())
-                .add(new ChatMessage(npc.getName(), message));
-            
-            npc.getEntity().getWorld().getPlayers().forEach(player -> {
-                if (player.isOnline()) {
-                    player.sendMessage("<" + npc.getName() + "> " + message);
-                }
-            });
-            context.addToHistory("NPC dijo: " + message);
-        } else if (response.startsWith("SEGUIR ")) {
-            String playerName = response.substring(7).trim();
-            Player target = Bukkit.getPlayer(playerName.replace("<", "").replace(">", ""));
-            if (target != null) {
-                npc.getNavigator().setTarget(target, true);
-                npc.getNavigator().getDefaultParameters().speedModifier(3.5f);
-                context.addToHistory("NPC está siguiendo a " + playerName);
-            }
-        } else if (response.startsWith("SALUDAR ")) {
-            String playerName = response.substring(8).trim();
-            Player target = Bukkit.getPlayer(playerName);
-            if (target != null) {
-                String greeting = "¡Hola " + playerName + "!";
-                globalChatHistory.computeIfAbsent(npc.getName(), k -> new ArrayList<>())
-                    .add(new ChatMessage(npc.getName(), greeting));
-                
-                context.addToHistory("NPC saludó a " + playerName);
-                target.sendMessage("<" + npc.getName() + "> " + greeting);
-            }
-        } else if (response.startsWith("CAMINAR ")) {
-            // Formato esperado: "CAMINAR north/south/east/west/northeast/northwest/southeast/southwest distancia"
-            String[] parts = response.substring(8).trim().split(" ");
-            if (parts.length >= 2) {
-                String direction = parts[0].toLowerCase();
-                try {
-                    double distance = Double.parseDouble(parts[1]);
+            AIResponseBuilder aiResponse = AIResponseBuilder.parse(response);
+             // Parsear la acción desde la respuesta del modelo
+            NPCAction action = NPCAction.fromResponse(response);
+            // Obtener los argumentos que acompañan a la acción
+
+            String[] parts = response.split(" ", 2); // Divide en acción y el resto
+            String details = parts.length > 1 ? parts[1] : "";
+
+            switch (action) {
+                case TALK:
+                    globalChatHistory.computeIfAbsent(npc.getName(), k -> new ArrayList<>())
+                        .add(new ChatMessage(npc.getName(), details));
+                    
+                    npc.getEntity().getWorld().getPlayers().forEach(player -> {
+                        if (player.isOnline()) {
+                            player.sendMessage("<" + npc.getName() + "> " + details);
+                        }
+                    });
+                    context.addToHistory("NPC dijo: " + details);
+                    break;
+
+                case FOLLOW:
+                    Player followTarget = Bukkit.getPlayer(aiResponse.getTarget());
+                    if (followTarget != null) {
+                        npc.getNavigator().setTarget(followTarget, true);
+                        npc.getNavigator().getDefaultParameters().speedModifier(3.5f);
+                        context.addToHistory("NPC está siguiendo a " + aiResponse.getTarget());
+                    }
+                    break;
+
+                case GREET:
+                    Player greetTarget = Bukkit.getPlayer(aiResponse.getTarget());
+                    if (greetTarget != null) {
+                        String greeting = "¡Hola " + aiResponse.getTarget() + "!";
+                        globalChatHistory.computeIfAbsent(npc.getName(), k -> new ArrayList<>())
+                            .add(new ChatMessage(npc.getName(), greeting));
+                        
+                        context.addToHistory("NPC saludó a " + aiResponse.getTarget());
+                        greetTarget.sendMessage("<" + npc.getName() + "> " + greeting);
+                    }
+                    break;
+
+                case WALK:
                     Location currentLoc = npc.getEntity().getLocation();
-                    Location targetLoc = calculateTargetLocation(currentLoc, direction, distance);
+                    Location targetLoc = calculateTargetLocation(currentLoc, aiResponse.getDirection(), aiResponse.getDistance());
                     
                     if (targetLoc != null) {
                         npc.getNavigator().setTarget(targetLoc);
                         npc.getNavigator().getDefaultParameters().speedModifier(1.0f);
-                        context.addToHistory("NPC está caminando hacia " + direction + " por " + distance + " bloques");
+                        context.addToHistory("NPC está caminando hacia " + aiResponse.getDirection() 
+                                            + " por " + aiResponse.getDistance() + " bloques");
                     }
-                } catch (NumberFormatException e) {
-                    context.addToHistory("Error: Distancia inválida especificada");
-                }
+                    break;
             }
         }
-    }
 
     private Location calculateTargetLocation(Location currentLoc, String direction, double distance) {
         Location targetLoc = currentLoc.clone();
