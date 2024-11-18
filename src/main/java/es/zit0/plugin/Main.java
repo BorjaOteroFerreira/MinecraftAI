@@ -7,6 +7,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import es.zit0.plugin.traits.LLMAITrait;
+
 public class Main extends JavaPlugin implements Listener {
     private static Main instance;
     private String llmApiUrl;

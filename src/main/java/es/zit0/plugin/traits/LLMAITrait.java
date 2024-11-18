@@ -1,7 +1,9 @@
-package es.zit0.plugin;
+package es.zit0.plugin.traits;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
+import es.zit0.plugin.Main;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
