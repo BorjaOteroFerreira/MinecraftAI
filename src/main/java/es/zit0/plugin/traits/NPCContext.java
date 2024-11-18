@@ -7,20 +7,42 @@ import java.util.*;
 public class NPCContext {
     private static final int CONTEXT_HISTORY_SIZE = 20;
     
-    List<String> conversationHistory = new ArrayList<>();
-    Location lastLocation;
-    long lastActionTime;
-    List<String> nearbyPlayers = new ArrayList<>();
-    String currentActivity;
-    List<ChatMessage> recentMessages = new ArrayList<>();
-
-    // Global chat history reference
+    private List<String> conversationHistory = new ArrayList<>();
+    @SuppressWarnings("unused")
+    private Location lastLocation;
+    @SuppressWarnings("unused")
+    private long lastActionTime;
+    private List<String> nearbyPlayers = new ArrayList<>();
+    private String currentActivity;
+    private List<ChatMessage> recentMessages = new ArrayList<>();
     private final Map<String, List<ChatMessage>> globalChatHistory;
+
 
     public NPCContext(Map<String, List<ChatMessage>> globalChatHistory) {
         this.globalChatHistory = globalChatHistory;
         this.currentActivity = "Iniciando";
         this.lastActionTime = System.currentTimeMillis();
+    }
+    public void setLastLocation(Location lastLocation) {
+        this.lastLocation = lastLocation;
+    }
+
+    public void addNearbyPlayer(String playerName) {
+        nearbyPlayers.add(playerName);
+    }
+
+    public void clearNearbyPlayers() {
+        nearbyPlayers.clear();
+    }
+    public String getCurrentActivity() {
+        return currentActivity;
+    }
+    public String setCurrentActivity(String currentActivity) {
+        return currentActivity;
+    }
+
+    public void setLastActionTime(long lastActionTime) {
+        this.lastActionTime = lastActionTime;
     }
 
     public void addToHistory(String event) {
@@ -70,7 +92,6 @@ public class NPCContext {
         conversationHistory.forEach(event -> 
             context.append("- ").append(event).append("\n")
         );
-        
         return context.toString();
     }
 }

@@ -8,8 +8,6 @@ import es.zit0.plugin.chat.ChatMessage;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
-import net.citizensnpcs.api.npc.NPC;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -44,7 +42,7 @@ public class NPCAI extends Trait {
         plugin.getLogger().info("NPC " + npc.getName() + " con trait LLMAI ha aparecido.");
         isActive = true;
         this.context = new NPCContext(globalChatHistory); 
-        context.currentActivity = "Recién spawneado";
+        context.setCurrentActivity("Recién spawneado");
         startAILoop();
         makeInitialQuery();
     }
@@ -150,6 +148,7 @@ public class NPCAI extends Trait {
             Bukkit.getScheduler().runTask(plugin, () -> handleLLMResponse(response));
         });
     }
+    @SuppressWarnings("unused")
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         String playerName = event.getPlayer().getName();
@@ -173,20 +172,21 @@ public class NPCAI extends Trait {
     private void updateContext() {
         if (!npc.isSpawned()) return;
 
-        context.lastLocation = npc.getEntity().getLocation();
-        context.nearbyPlayers.clear();
+        context.setLastLocation(npc.getEntity().getLocation());
+        context.clearNearbyPlayers();
 
         // Actualizar jugadores cercanos
         npc.getEntity().getNearbyEntities(10, 10, 10).stream()
             .filter(entity -> entity instanceof Player)
-            .forEach(entity -> context.nearbyPlayers.add(((Player) entity).getName()));
+            .forEach(entity -> context.addNearbyPlayer(((Player) entity).getName()));
 
         // Actualizar mensajes recientes de jugadores cercanos
         context.updateRecentMessages(10); // 10 bloques de radio
 
-        context.lastActionTime = System.currentTimeMillis();
+        context.setLastActionTime(System.currentTimeMillis());
     }
 
+    @SuppressWarnings("unused")
     private void handleLLMResponse(String response) {
         if (response.startsWith("HABLAR ")) {
             String message = response.substring(7).trim();
