@@ -21,7 +21,8 @@ Este es un proyecto de **prueba de concepto (PoC)**. Aunque funcional en su form
 
 ## 🏗 **Instrucciones para Compilación**
 ### Pasos importantes antes de compilar:
-- **No incluyas Citizens en la compilación.** Asegúrate de desmarcar el plugin de `Citizens 2.0.36-SNAPSHOT.jar` para compilacion y mantener unicamente `citizens-v1_21_R2-2.0.36-SNAPSHOT.jar`.
+- **No incluyas Citizens en la compilación.** 
+Asegúrate de desmarcar el plugin de `Citizens 2.0.36-SNAPSHOT.jar` para compilacion y mantener unicamente `citizens-v1_21_R2-2.0.36-SNAPSHOT.jar`.
 
 
 ---
