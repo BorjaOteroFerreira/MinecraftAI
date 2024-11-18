@@ -1,4 +1,4 @@
-package es.zit0.plugin.traits;
+package es.zit0.plugin.traits.NPCAI;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

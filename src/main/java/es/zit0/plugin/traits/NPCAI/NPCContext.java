@@ -1,4 +1,4 @@
-package es.zit0.plugin.traits;
+package es.zit0.plugin.traits.NPCAI;
 
 import org.bukkit.Location;
 import es.zit0.plugin.chat.ChatMessage;
