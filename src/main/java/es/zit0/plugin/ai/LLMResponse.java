@@ -2,42 +2,50 @@ package es.zit0.plugin.ai;
 import es.zit0.plugin.traits.NPCAI.NPCAction;
 
 
-public class AIResponseBuilder {
+public class LLMResponse {
     String action;
      String target;
     String message;
     String direction;
     double distance;
 
-    public static AIResponseBuilder parse(String rawResponse) {
-        AIResponseBuilder response = new AIResponseBuilder();
+    public static LLMResponse parse(String rawResponse) {
+        LLMResponse response = new LLMResponse();
+        
         try {
             NPCAction actionType = NPCAction.fromResponse(rawResponse);
             response.action = actionType.name();
-
-            String payload = rawResponse.substring(actionType.getPrefix().length() + 1).trim();
-
+            
+            // Remove the action prefix and trim
+            String payload = rawResponse.substring(actionType.getPrefix().length()).replaceAll("[<>]", "").trim();;
+            
             switch (actionType) {
-                case TALK:
+                case HABLAR:
                     response.message = payload;
                     break;
-                case FOLLOW:
-                    response.target = payload.replace("<", "").replace(">", "");
-                    break;
-                case GREET:
+                case SEGUIR:
                     response.target = payload;
                     break;
-                case WALK:
-                    String[] parts = payload.split(" ");
+                case SALUDAR:
+                    response.target = payload.trim();
+                    break;
+                case CAMINAR:
+                    String[] parts = payload.split("\\s+");
                     if (parts.length >= 2) {
                         response.direction = parts[0].toLowerCase();
-                        response.distance = Double.parseDouble(parts[1]);
+                        try {
+                            response.distance = Double.parseDouble(parts[1]);
+                        } catch (NumberFormatException e) {
+                            // Default to a small distance if parsing fails
+                            response.distance = 1.0;
+                        }
                     }
                     break;
             }
         } catch (Exception e) {
-            // Fallback to generic talk action
-            response.action = NPCAction.TALK.name();
+            // More detailed fallback with logging
+            System.err.println("Error parsing LLM response: " + rawResponse);
+            response.action = NPCAction.HABLAR.name();
             response.message = "Lo siento, algo salió mal al procesar mi respuesta.";
         }
         return response;

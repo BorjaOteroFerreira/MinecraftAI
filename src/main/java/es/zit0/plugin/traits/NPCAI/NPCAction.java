@@ -1,10 +1,10 @@
 package es.zit0.plugin.traits.NPCAI;
 
 public enum NPCAction {
-    TALK("HABLAR"),
-    FOLLOW("SEGUIR"),
-    GREET("SALUDAR"),
-    WALK("CAMINAR");
+    HABLAR("HABLAR"),
+    SEGUIR("SEGUIR"),
+    SALUDAR("SALUDAR"),
+    CAMINAR("CAMINAR");
 
     private final String prefix;
 
@@ -17,11 +17,17 @@ public enum NPCAction {
     }
 
     public static NPCAction fromResponse(String response) {
+        if (response == null || response.trim().isEmpty()) {
+            return HABLAR; // Default to talking if no response
+        }
+
         for (NPCAction action : values()) {
-            if (response.startsWith(action.getPrefix() + " ")) {
+            if (response.trim().startsWith(action.prefix)) {
                 return action;
             }
         }
-        throw new IllegalArgumentException("Unknown action: " + response);
+
+        // If no matching action found, default to talking
+        return HABLAR;
     }
 }

@@ -4,10 +4,18 @@ public class ChatMessage {
     String message;
     long timestamp;
 
-    public ChatMessage(String sender, String message) {
+    public ChatMessage(String sender, String message, long timestamp) {
         this.sender = sender;
         this.message = message;
-        this.timestamp = System.currentTimeMillis();
+        this.timestamp = timestamp;
+    }
+
+    public String getPlayerName() {
+        return sender;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public long getTimestamp() {

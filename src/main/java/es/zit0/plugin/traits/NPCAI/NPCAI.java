@@ -2,7 +2,8 @@ package es.zit0.plugin.traits.NPCAI;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import es.zit0.plugin.Main;
-import es.zit0.plugin.ai.AIResponseBuilder;
+import es.zit0.plugin.ai.LLMResponse;
+import es.zit0.plugin.ai.LLMQueryService;
 import es.zit0.plugin.chat.ChatMessage;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
@@ -12,28 +13,25 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @TraitName("llmai")
 public class NPCAI extends Trait {
     private final Main plugin;
-    private final Gson gson = new Gson();
     private final int CONTEXT_HISTORY_SIZE = 20;
     private NPCContext context;
     private boolean isActive = false;
     private static final Map<String, List<ChatMessage>> globalChatHistory = new HashMap<>();
-    
-   
-    
+    private final LLMQueryService llmQueryService;
+    private boolean isQueryInProgress = false;
+
+
     public NPCAI() {
         super("llmai");
         this.plugin = Main.getInstance();
+        this.llmQueryService = new LLMQueryService(plugin.getLlmApiUrl());
         this.context = new NPCContext(globalChatHistory);
     }
 
@@ -44,129 +42,161 @@ public class NPCAI extends Trait {
         this.context = new NPCContext(globalChatHistory); 
         context.setCurrentActivity("Recién spawneado");
         startAILoop();
-        makeInitialQuery();
+        //makeInitialQuery();
     }
 
-    private String queryLLM(String contextInfo) throws IOException, URISyntaxException {
-        URL url = new URI(plugin.getLlmApiUrl()).toURL();
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setDoOutput(true);
-        con.setConnectTimeout(5000);
-        con.setReadTimeout(5000);
 
-        String systemPrompt = """
-            Eres un " %s" amigable en Minecraft llamado %s. Tu objetivo es interactuar con los jugadores
-            de manera natural y amistosa. DEBES responder SOLO con UNA de estas acciones exactas:
-            SEGUIR <jugador> 
-            CAMINAR <dirección> <distancia> formato esperado : CAMINAR north/south/east/west/northeast/northwest/southeast/southwest distancia
-            HABLAR <mensaje que quieres decir>
-            SALUDAR <jugador>
-            No te quedes mucho tiempo en el mismo sitio. usa CAMINAR
-            No dejes de seguir al jugador mientras le hablas.
-            Puedes seguir al jugador para no perderle de vista.
-            Te gusta mucho CAMINAR.
-            Cuando no sepas qué hacer, simplemente responde con "HABLAR <mensaje>".
-            """.formatted(npc.getEntity().getType().toString(),npc.getName());
-
-        String userPrompt = """
-
-            Situación actual:
-            %s
-            
-            ¿Qué acción tomarías? Responde solo con una de las acciones permitidas.
-            """.formatted(contextInfo);
-
-        String jsonInputString = gson.toJson(Map.of(
-            "messages", List.of(
-                Map.of("role", "system", "content", systemPrompt),
-                Map.of("role", "user", "content", userPrompt)
-            ),
-            "temperature", 0.7,
-            "max_tokens", 150
-          
-        ));
-
-        try (OutputStream os = con.getOutputStream()) {
-            os.write(jsonInputString.getBytes());
-            os.flush();
-        }
-
-        StringBuilder response = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                response.append(line);
-            }
-        }
-
-        JsonObject jsonResponse = gson.fromJson(response.toString(), JsonObject.class);
-        return jsonResponse.getAsJsonArray("choices")
-                          .get(0).getAsJsonObject()
-                          .getAsJsonObject("message")
-                          .get("content").getAsString();
-    }
 
     private void startAILoop() {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            if (npc != null && npc.isSpawned() && isActive) {
-                updateNPCAI();
+            if (npc != null && npc.isSpawned() && isActive && !isQueryInProgress) {
+                isQueryInProgress = true;
+                updateNPCAI(() -> {
+                    isQueryInProgress = false;
+                });
             }
-        }, 20L, 300L); 
+        }, 0L, 300L); // 300L = 15 segundos
     }
 
     private void makeInitialQuery() {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                String response = queryLLM("Acabas de aparecer en el mundo como un NPC. " + 
-                                        context.getContextString());
+            int maxRetries = 1;
+            for (int retry = 0; retry < maxRetries; retry++) {
+                try {
+                    String systemPrompt = """
+                    
+                    IMPORTANTE: DEBES RESPONDER ÚNICAMENTE CON UNA DE ESTAS 3 ACCIONES:
+                    SEGUIR <jugador>
+                    CAMINAR <dirección> <número_entero>
+                    SALUDAR <jugador>
+                    HABLAR <mensaje>
+                    Direcciones válidas: north, south, east, west, northeast, northwest, southeast, southwest
+                    Si no hay jugadores o no sabes qué hacer, responde: CAMINAR <direccion> <numero> o tambien puedes hablar con los jugadores cercanos
+                    NO PUEDE EXISTIR TEXTO ADICIONAL ANTES NI DESPUES DE LA ACCION; NO EXPLIQUES TU RAZONAMIENTO SOLO RESPONDE CON LA ACCIOn
+                    NO ESCRIBAS NADA MÁS. SOLO LA ACCIÓN.
+                    NO DES EXPLICACIONES.
+                    NO USES OTROS FORMATOS.
+                    RESPONDE SOLO CON LA ACCIÓN."""
+                    .formatted(npc.getEntity().getType().toString(), npc.getName());
 
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    handleLLMResponse(response);
-                });
-            } catch (Exception e) {
-                plugin.getLogger().severe("Error en consulta inicial LLM: " + e.getMessage());
-                e.printStackTrace();
-                Bukkit.getScheduler().runTaskLater(plugin, this::makeInitialQuery, 100L);
-            }
+                    //String userContext = "Esto son datos del entorno de minecraft. No debes hablarle a los usuarios ni responder a los mensajes de entorno , solo toma decisiones y ejecuta acciones, ENTORNO: " + context.getContextString();
+                    String userContext = "Elige una accion para el npc , recuerda responder solo con la accion en el formato correcto";
+
+                    String response = LLMQueryService.builder()
+                        .systemPrompt(systemPrompt)
+                        .userContext(userContext)
+                        .build(llmQueryService);
+
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        handleLLMResponse(response);
+                    });
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Error en consulta inicial LLM (Intento " + (retry + 1) + "): " + e.getMessage());
+                
+                    if (retry == maxRetries - 1) {
+                        // Last retry failed
+                        plugin.getLogger().severe("Todos los intentos de consulta inicial fallaron.");
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            handleLLMResponse("HABLAR algo ha salido mal"); // Fallback action
+                        });
+                    } else {
+                        try {
+                            Thread.sleep(5000 * (retry + 1)); // Exponential backoff
+                        } catch (InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                }
+            }   
         });
     }
-
-    private void updateNPCAI() {
+    private void updateNPCAI(Runnable onComplete) {
         updateContext();
-
         CompletableFuture.supplyAsync(() -> {
-            try {
-                return queryLLM(context.getContextString());
-            } catch (Exception e) {
-                plugin.getLogger().severe("Error en consulta LLM: " + e.getMessage());
-                e.printStackTrace();
-                return "HABLAR Lo siento, estoy teniendo problemas técnicos.";
+            int maxRetries = 1;
+            for (int retry = 0; retry < maxRetries; retry++) {
+                try {
+                    String systemPrompt = """
+Eres un %s en Minecraft llamado %s y tienes que tomar decisiones.
+IMPORTANTE: DEBES RESPONDER ÚNICAMENTE CON UNA DE ESTAS ACCIONES:
+SEGUIR <jugador>
+CAMINAR <dirección> <número_entero>
+SALUDAR <jugador>
+HABLAR <mensaje>
+Direcciones válidas: north, south, east, west, northeast, northwest, southeast, southwest
+Si no hay jugadores o no sabes qué hacer, responde: CAMINAR north <numero> 
+NO PUEDE EXISTIR TEXTO ADICIONAL ANTES NI DESPUES DE LA ACCION; NO EXPLIQUES TU RAZONAMIENTO SOLO RESPONDE CON LA ACCIOn
+NO ESCRIBAS NADA MÁS. SOLO LA ACCIÓN.
+NO DES EXPLICACIONES. 
+NO USES OTROS FORMATOS.
+RESPONDE SOLO CON LA ACCIÓN.""".formatted(npc.getEntity().getType().toString(), npc.getName());
+                                           
+
+                    String userContext = """
+esto es informacion del entorno : 
+%s
+Puedes mantener conversaciones gracias al historial de mensajes recientes de jugadores cercanos.
+que accion tomas? responde solo con la accion";""".formatted(context.getContextString());
+               
+        
+                    return LLMQueryService.builder()
+                        .systemPrompt(systemPrompt)
+                        .userContext(userContext)
+                        .build(llmQueryService);
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Reintento " + (retry + 1) + " fallido: " + e.getMessage());
+                    if (retry == maxRetries - 1) {
+                        return "CAMINAR north 5"; // Fallback action
+                    }
+                    try {
+                        Thread.sleep(5000 * (retry + 1)); // Exponential backoff
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
+            return "CAMINAR north 5"; // Fallback action
         }).thenAccept(response -> {
-            Bukkit.getScheduler().runTask(plugin, () -> handleLLMResponse(response));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                handleLLMResponse(response);
+                onComplete.run(); // Marca la consulta como completada
+            });
         });
     }
+    
+
     @SuppressWarnings("unused")
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         String playerName = event.getPlayer().getName();
-        String message = event.getMessage();
         
-        // Añadir mensaje al historial global
-        globalChatHistory.computeIfAbsent(playerName, k -> new ArrayList<>())
-            .add(new ChatMessage(playerName, message));
-
-        // Mantener solo los últimos CONTEXT_HISTORY_SIZE mensajes por jugador
-        List<ChatMessage> playerMessages = globalChatHistory.get(playerName);
-        if (playerMessages.size() > CONTEXT_HISTORY_SIZE) {
-            playerMessages = playerMessages.subList(
-                playerMessages.size() - CONTEXT_HISTORY_SIZE,
-                playerMessages.size()
-            );
-            globalChatHistory.put(playerName, playerMessages);
+        // Ignorar si proviene del mismo npc
+        if (playerName.equals(npc.getName())) {
+            return;
         }
+        
+        String message = event.getMessage();
+        long currentTime = System.currentTimeMillis();
+        
+        // Añadir mensaje al historial global con timestamp
+        globalChatHistory.computeIfAbsent(playerName, k -> new ArrayList<>())
+            .add(new ChatMessage(playerName, message, currentTime));
+
+        // Eliminar mensajes más antiguos de 1 minuto y mantener el límite de tamaño
+        List<ChatMessage> playerMessages = globalChatHistory.get(playerName);
+        List<ChatMessage> updatedMessages = playerMessages.stream()
+            .filter(chatMessage -> (currentTime - chatMessage.getTimestamp()) <= 60000) // 60000 ms = 1 minuto
+            .collect(Collectors.toList());
+        
+        // Mantener solo los últimos CONTEXT_HISTORY_SIZE mensajes
+        if (updatedMessages.size() > CONTEXT_HISTORY_SIZE) {
+            updatedMessages = updatedMessages.subList(
+                updatedMessages.size() - CONTEXT_HISTORY_SIZE,
+                updatedMessages.size()
+            );
+        }
+        
+        globalChatHistory.put(playerName, updatedMessages);
     }
 
     private void updateContext() {
@@ -188,7 +218,7 @@ public class NPCAI extends Trait {
 
     @SuppressWarnings("unused")
     private void handleLLMResponse(String response) {
-            AIResponseBuilder aiResponse = AIResponseBuilder.parse(response);
+            LLMResponse aiResponse = LLMResponse.parse(response);
              // Parsear la acción desde la respuesta del modelo
             NPCAction action = NPCAction.fromResponse(response);
             // Obtener los argumentos que acompañan a la acción
@@ -197,10 +227,7 @@ public class NPCAI extends Trait {
             String details = parts.length > 1 ? parts[1] : "";
 
             switch (action) {
-                case TALK:
-                    globalChatHistory.computeIfAbsent(npc.getName(), k -> new ArrayList<>())
-                        .add(new ChatMessage(npc.getName(), details));
-                    
+                case HABLAR:
                     npc.getEntity().getWorld().getPlayers().forEach(player -> {
                         if (player.isOnline()) {
                             player.sendMessage("<" + npc.getName() + "> " + details);
@@ -209,7 +236,7 @@ public class NPCAI extends Trait {
                     context.addToHistory("NPC dijo: " + details);
                     break;
 
-                case FOLLOW:
+                case SEGUIR:
                     Player followTarget = Bukkit.getPlayer(aiResponse.getTarget());
                     if (followTarget != null) {
                         npc.getNavigator().setTarget(followTarget, true);
@@ -218,19 +245,15 @@ public class NPCAI extends Trait {
                     }
                     break;
 
-                case GREET:
+                case SALUDAR:
                     Player greetTarget = Bukkit.getPlayer(aiResponse.getTarget());
                     if (greetTarget != null) {
-                        String greeting = "¡Hola " + aiResponse.getTarget() + "!";
-                        globalChatHistory.computeIfAbsent(npc.getName(), k -> new ArrayList<>())
-                            .add(new ChatMessage(npc.getName(), greeting));
-                        
+                        String greeting = "¡Hola " + aiResponse.getTarget() + "!";       
                         context.addToHistory("NPC saludó a " + aiResponse.getTarget());
                         greetTarget.sendMessage("<" + npc.getName() + "> " + greeting);
                     }
                     break;
-
-                case WALK:
+                case CAMINAR:
                     Location currentLoc = npc.getEntity().getLocation();
                     Location targetLoc = calculateTargetLocation(currentLoc, aiResponse.getDirection(), aiResponse.getDistance());
                     

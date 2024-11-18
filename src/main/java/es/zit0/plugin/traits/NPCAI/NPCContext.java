@@ -2,6 +2,8 @@ package es.zit0.plugin.traits.NPCAI;
 
 import org.bukkit.Location;
 import es.zit0.plugin.chat.ChatMessage;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class NPCContext {
@@ -16,7 +18,7 @@ public class NPCContext {
     private String currentActivity;
     private List<ChatMessage> recentMessages = new ArrayList<>();
     private final Map<String, List<ChatMessage>> globalChatHistory;
-
+    private LocalDateTime timeNow = LocalDateTime.now();
 
     public NPCContext(Map<String, List<ChatMessage>> globalChatHistory) {
         this.globalChatHistory = globalChatHistory;
@@ -36,6 +38,11 @@ public class NPCContext {
     }
     public String getCurrentActivity() {
         return currentActivity;
+    }
+
+
+    public LocalDateTime getTimeNow() {
+        return timeNow;
     }
     public String setCurrentActivity(String currentActivity) {
         return currentActivity;
@@ -67,7 +74,6 @@ public class NPCContext {
 
         // Ordenar mensajes por timestamp
         recentMessages.sort(Comparator.comparingLong(ChatMessage::getTimestamp));
-
         // Mantener solo los últimos CONTEXT_HISTORY_SIZE mensajes
         if (recentMessages.size() > CONTEXT_HISTORY_SIZE) {
             recentMessages = recentMessages.subList(
@@ -79,15 +85,14 @@ public class NPCContext {
 
     public String getContextString() {
         StringBuilder context = new StringBuilder();
+        context.append("Datos de fecha y hora: " ).append(timeNow).append("\n");
         context.append("Situación actual:\n");
         context.append("- Actividad actual: ").append(currentActivity).append("\n");
         context.append("- Jugadores cercanos: ").append(String.join(", ", nearbyPlayers)).append("\n");
-        
         context.append("\nMensajes recientes:\n");
         recentMessages.forEach(msg -> 
             context.append("- ").append(msg.toString()).append("\n")
         );
-        
         context.append("\nHistorial de acciones:\n");
         conversationHistory.forEach(event -> 
             context.append("- ").append(event).append("\n")
