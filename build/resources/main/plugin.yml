@@ -1,4 +1,4 @@
-name: NPCAI
+name: MinecraftAI
 version: 1.0
 main: es.zit0.plugin.Main
 api-version: '1.21'

@@ -4,9 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import es.zit0.plugin.Main;
+import es.zit0.plugin.chat.ChatMessage;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
+import net.citizensnpcs.api.npc.NPC;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -21,108 +24,26 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @TraitName("llmai")
-public class LLMAITrait extends Trait {
+public class NPCAI extends Trait {
     private final Main plugin;
     private final Gson gson = new Gson();
     private final int CONTEXT_HISTORY_SIZE = 20;
     private NPCContext context;
     private boolean isActive = false;
     private static final Map<String, List<ChatMessage>> globalChatHistory = new HashMap<>();
-
-
-    private class ChatMessage {
-        String sender;
-        String message;
-        long timestamp;
-
-        public ChatMessage(String sender, String message) {
-            this.sender = sender;
-            this.message = message;
-            this.timestamp = System.currentTimeMillis();
-        }
-
-        @Override
-        public String toString() {
-            return sender + ": " + message;
-        }
-    }
-
-    private class NPCContext {
-        List<String> conversationHistory = new ArrayList<>();
-        Location lastLocation;
-        long lastActionTime;
-        List<String> nearbyPlayers = new ArrayList<>();
-        String currentActivity;
-        List<ChatMessage> recentMessages = new ArrayList<>();
-
-        public NPCContext() {
-            this.currentActivity = "Iniciando";
-            this.lastActionTime = System.currentTimeMillis();
-        }
-
-        public void addToHistory(String event) {
-            if (conversationHistory.size() >= CONTEXT_HISTORY_SIZE) {
-                conversationHistory.remove(0);
-            }
-            conversationHistory.add(event);
-        }
-        public void updateRecentMessages(int radius) {
-            recentMessages.clear();
-            Set<String> nearbyPlayerNames = new HashSet<>(nearbyPlayers);
-            
-            // Obtener mensajes recientes de jugadores cercanos
-            globalChatHistory.forEach((playerName, messages) -> {
-                if (nearbyPlayerNames.contains(playerName)) {
-                    // Añadir los últimos 5 mensajes de cada jugador cercano
-                    int startIndex = Math.max(0, messages.size() - 5);
-                    recentMessages.addAll(messages.subList(startIndex, messages.size()));
-                }
-            });
-
-            // Ordenar mensajes por timestamp
-            recentMessages.sort(Comparator.comparingLong(m -> m.timestamp));
-
-            // Mantener solo los últimos CONTEXT_HISTORY_SIZE mensajes
-            if (recentMessages.size() > CONTEXT_HISTORY_SIZE) {
-                recentMessages = recentMessages.subList(
-                    recentMessages.size() - CONTEXT_HISTORY_SIZE, 
-                    recentMessages.size()
-                );
-            }
-        }
-
-        public String getContextString() {
-            StringBuilder context = new StringBuilder();
-            context.append("Situación actual:\n");
-            context.append("- Actividad actual: ").append(currentActivity).append("\n");
-            context.append("- Jugadores cercanos: ").append(String.join(", ", nearbyPlayers)).append("\n");
-            
-            context.append("\nMensajes recientes:\n");
-            recentMessages.forEach(msg -> 
-                context.append("- ").append(msg.toString()).append("\n")
-            );
-            
-            context.append("\nHistorial de acciones:\n");
-            conversationHistory.forEach(event -> 
-                context.append("- ").append(event).append("\n")
-            );
-            
-            return context.toString();
-        }
-    }
-
-    public LLMAITrait() {
+   
+    
+    public NPCAI() {
         super("llmai");
         this.plugin = Main.getInstance();
-        this.context = new NPCContext();
+        this.context = new NPCContext(globalChatHistory);
     }
-
 
     @Override
     public void onSpawn() {
         plugin.getLogger().info("NPC " + npc.getName() + " con trait LLMAI ha aparecido.");
         isActive = true;
-        this.context = new NPCContext();
+        this.context = new NPCContext(globalChatHistory); 
         context.currentActivity = "Recién spawneado";
         startAILoop();
         makeInitialQuery();

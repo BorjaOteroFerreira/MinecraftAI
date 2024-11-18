@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import es.zit0.plugin.traits.LLMAITrait;
+import es.zit0.plugin.traits.NPCAI;
 
 public class Main extends JavaPlugin implements Listener {
     private static Main instance;
@@ -22,7 +22,7 @@ public class Main extends JavaPlugin implements Listener {
             return;
         }
         // Ahora puedes registrar el trait
-        CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(LLMAITrait.class).withName("llmai"));
+        CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(NPCAI.class).withName("llmai"));
 
         // Verificar que Citizens esté presente
         if (!getServer().getPluginManager().isPluginEnabled("Citizens")) {
@@ -64,7 +64,7 @@ public class Main extends JavaPlugin implements Listener {
         try {
             if (CitizensAPI.getTraitFactory() != null) {
                 CitizensAPI.getTraitFactory().registerTrait(
-                    TraitInfo.create(LLMAITrait.class).withName("llmai")
+                    TraitInfo.create(NPCAI.class).withName("llmai")
                 );
                 traitsRegistered = true;
                 getLogger().info("¡Trait LLMAI registrado exitosamente!");
