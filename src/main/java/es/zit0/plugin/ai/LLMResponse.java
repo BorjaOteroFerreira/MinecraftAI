@@ -4,7 +4,7 @@ import es.zit0.plugin.traits.NPCAI.NPCAction;
 
 public class LLMResponse {
     String action;
-     String target;
+    String target;
     String message;
     String direction;
     double distance;
@@ -37,16 +37,19 @@ public class LLMResponse {
                             response.distance = Double.parseDouble(parts[1]);
                         } catch (NumberFormatException e) {
                             // Default to a small distance if parsing fails
-                            response.distance = 1.0;
+                            response.distance = 1;
                         }
                     }
                     break;
+                default: // Default to talking
+                    response.message = "Me he equivocado al usar la accion: " + actionType.name() + ". Lo intentaré de nuevo";
+                    return response;
             }
         } catch (Exception e) {
             // More detailed fallback with logging
             System.err.println("Error parsing LLM response: " + rawResponse);
             response.action = NPCAction.HABLAR.name();
-            response.message = "Lo siento, algo salió mal al procesar mi respuesta.";
+            response.message = "Lo siento, algo salió mal al procesar mi respuesta. Lo intentaré de nuevo.";
         }
         return response;
     }

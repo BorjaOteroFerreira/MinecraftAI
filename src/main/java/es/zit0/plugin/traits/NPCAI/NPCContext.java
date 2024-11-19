@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class NPCContext {
-    private static final int CONTEXT_HISTORY_SIZE = 20;
+    private static final int CONTEXT_HISTORY_SIZE = 60;
     
     private List<String> conversationHistory = new ArrayList<>();
     @SuppressWarnings("unused")
@@ -19,11 +19,13 @@ public class NPCContext {
     private List<ChatMessage> recentMessages = new ArrayList<>();
     private final Map<String, List<ChatMessage>> globalChatHistory;
     private LocalDateTime timeNow = LocalDateTime.now();
+    String npcName;
 
-    public NPCContext(Map<String, List<ChatMessage>> globalChatHistory) {
+    public NPCContext(Map<String, List<ChatMessage>> globalChatHistory, String npcName) {
         this.globalChatHistory = globalChatHistory;
         this.currentActivity = "Iniciando";
         this.lastActionTime = System.currentTimeMillis();
+        this.npcName = npcName;
     }
     public void setLastLocation(Location lastLocation) {
         this.lastLocation = lastLocation;
@@ -90,9 +92,17 @@ public class NPCContext {
         context.append("- Actividad actual: ").append(currentActivity).append("\n");
         context.append("- Jugadores cercanos: ").append(String.join(", ", nearbyPlayers)).append("\n");
         context.append("\nMensajes recientes:\n");
-        recentMessages.forEach(msg -> 
-            context.append("- ").append(msg.toString()).append("\n")
-        );
+           // Filtrar mensajes, excluyendo los del NPC actual
+           for (Map.Entry<String, List<ChatMessage>> entry : globalChatHistory.entrySet()) {
+            if (!entry.getKey().equals(npcName)) {  // npcName sería el nombre de este NPC
+                for (ChatMessage message : entry.getValue()) {
+                    context.append(message.getPlayerName())
+                          .append(": ")
+                          .append(message.getMessage())
+                          .append("\n");
+                }
+            }
+        }
         context.append("\nHistorial de acciones:\n");
         conversationHistory.forEach(event -> 
             context.append("- ").append(event).append("\n")

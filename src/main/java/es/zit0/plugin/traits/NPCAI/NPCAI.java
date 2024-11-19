@@ -32,14 +32,15 @@ public class NPCAI extends Trait {
         super("llmai");
         this.plugin = Main.getInstance();
         this.llmQueryService = new LLMQueryService(plugin.getLlmApiUrl());
-        this.context = new NPCContext(globalChatHistory);
+        this.context = new NPCContext(globalChatHistory, super.getName());
+        
     }
 
     @Override
     public void onSpawn() {
         plugin.getLogger().info("NPC " + npc.getName() + " con trait LLMAI ha aparecido.");
         isActive = true;
-        this.context = new NPCContext(globalChatHistory); 
+        this.context = new NPCContext(globalChatHistory, super.getName()); 
         context.setCurrentActivity("Recién spawneado");
         startAILoop();
         //makeInitialQuery();
@@ -58,58 +59,7 @@ public class NPCAI extends Trait {
         }, 0L, 300L); // 300L = 15 segundos
     }
 
-    private void makeInitialQuery() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            int maxRetries = 1;
-            for (int retry = 0; retry < maxRetries; retry++) {
-                try {
-                    String systemPrompt = """
-                    
-                    IMPORTANTE: DEBES RESPONDER ÚNICAMENTE CON UNA DE ESTAS 3 ACCIONES:
-                    SEGUIR <jugador>
-                    CAMINAR <dirección> <número_entero>
-                    SALUDAR <jugador>
-                    HABLAR <mensaje>
-                    Direcciones válidas: north, south, east, west, northeast, northwest, southeast, southwest
-                    Si no hay jugadores o no sabes qué hacer, responde: CAMINAR <direccion> <numero> o tambien puedes hablar con los jugadores cercanos
-                    NO PUEDE EXISTIR TEXTO ADICIONAL ANTES NI DESPUES DE LA ACCION; NO EXPLIQUES TU RAZONAMIENTO SOLO RESPONDE CON LA ACCIOn
-                    NO ESCRIBAS NADA MÁS. SOLO LA ACCIÓN.
-                    NO DES EXPLICACIONES.
-                    NO USES OTROS FORMATOS.
-                    RESPONDE SOLO CON LA ACCIÓN."""
-                    .formatted(npc.getEntity().getType().toString(), npc.getName());
 
-                    //String userContext = "Esto son datos del entorno de minecraft. No debes hablarle a los usuarios ni responder a los mensajes de entorno , solo toma decisiones y ejecuta acciones, ENTORNO: " + context.getContextString();
-                    String userContext = "Elige una accion para el npc , recuerda responder solo con la accion en el formato correcto";
-
-                    String response = LLMQueryService.builder()
-                        .systemPrompt(systemPrompt)
-                        .userContext(userContext)
-                        .build(llmQueryService);
-
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        handleLLMResponse(response);
-                    });
-                } catch (Exception e) {
-                    plugin.getLogger().warning("Error en consulta inicial LLM (Intento " + (retry + 1) + "): " + e.getMessage());
-                
-                    if (retry == maxRetries - 1) {
-                        // Last retry failed
-                        plugin.getLogger().severe("Todos los intentos de consulta inicial fallaron.");
-                        Bukkit.getScheduler().runTask(plugin, () -> {
-                            handleLLMResponse("HABLAR algo ha salido mal"); // Fallback action
-                        });
-                    } else {
-                        try {
-                            Thread.sleep(5000 * (retry + 1)); // Exponential backoff
-                        } catch (InterruptedException ex) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-                }
-            }   
-        });
-    }
     private void updateNPCAI(Runnable onComplete) {
         updateContext();
         CompletableFuture.supplyAsync(() -> {
@@ -120,12 +70,12 @@ public class NPCAI extends Trait {
 Eres un %s en Minecraft llamado %s y tienes que tomar decisiones.
 IMPORTANTE: DEBES RESPONDER ÚNICAMENTE CON UNA DE ESTAS ACCIONES:
 SEGUIR <jugador>
-CAMINAR <dirección> <número_entero>
-SALUDAR <jugador>
 HABLAR <mensaje>
-Direcciones válidas: north, south, east, west, northeast, northwest, southeast, southwest
-Si no hay jugadores o no sabes qué hacer, responde: CAMINAR north <numero> 
-NO PUEDE EXISTIR TEXTO ADICIONAL ANTES NI DESPUES DE LA ACCION; NO EXPLIQUES TU RAZONAMIENTO SOLO RESPONDE CON LA ACCIOn
+CAMINAR <dirección> <número_entero>
+Direcciones válidas: north, south, east, west, northeast, northwest, southeast, southwest,  el numero de bloques a desplazarte es un entero
+Si no hay jugadores o no sabes qué hacer, caminar para buscar gente en la direccion que te apetezca. 
+NO PUEDE EXISTIR TEXTO ADICIONAL ANTES NI DESPUES DE LA ACCION; NO EXPLIQUES TU RAZONAMIENTO SOLO RESPONDE CON LA ACCION
+SI LA CONVERSACION ES REPETITIVA NO HABLES.
 NO ESCRIBAS NADA MÁS. SOLO LA ACCIÓN.
 NO DES EXPLICACIONES. 
 NO USES OTROS FORMATOS.
@@ -138,7 +88,7 @@ esto es informacion del entorno :
 Puedes mantener conversaciones gracias al historial de mensajes recientes de jugadores cercanos.
 que accion tomas? responde solo con la accion";""".formatted(context.getContextString());
                
-        
+                    Thread.sleep(6000); // Exponential backoff
                     return LLMQueryService.builder()
                         .systemPrompt(systemPrompt)
                         .userContext(userContext)
@@ -146,16 +96,16 @@ que accion tomas? responde solo con la accion";""".formatted(context.getContextS
                 } catch (Exception e) {
                     plugin.getLogger().warning("Reintento " + (retry + 1) + " fallido: " + e.getMessage());
                     if (retry == maxRetries - 1) {
-                        return "CAMINAR north 5"; // Fallback action
+                        return "HABLAR algo salio mal"; // Fallback action
                     }
                     try {
-                        Thread.sleep(5000 * (retry + 1)); // Exponential backoff
+                        Thread.sleep(6000 * (retry + 1)); // Exponential backoff
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
                 }
             }
-            return "CAMINAR north 5"; // Fallback action
+            return "HABLAR algo salio mal"; // Fallback action
         }).thenAccept(response -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 handleLLMResponse(response);
@@ -169,34 +119,43 @@ que accion tomas? responde solo con la accion";""".formatted(context.getContextS
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         String playerName = event.getPlayer().getName();
-        
-        // Ignorar si proviene del mismo npc
-        if (playerName.equals(npc.getName())) {
-            return;
-        }
-        
         String message = event.getMessage();
         long currentTime = System.currentTimeMillis();
-        
-        // Añadir mensaje al historial global con timestamp
-        globalChatHistory.computeIfAbsent(playerName, k -> new ArrayList<>())
-            .add(new ChatMessage(playerName, message, currentTime));
-
-        // Eliminar mensajes más antiguos de 1 minuto y mantener el límite de tamaño
-        List<ChatMessage> playerMessages = globalChatHistory.get(playerName);
-        List<ChatMessage> updatedMessages = playerMessages.stream()
-            .filter(chatMessage -> (currentTime - chatMessage.getTimestamp()) <= 60000) // 60000 ms = 1 minuto
-            .collect(Collectors.toList());
-        
-        // Mantener solo los últimos CONTEXT_HISTORY_SIZE mensajes
-        if (updatedMessages.size() > CONTEXT_HISTORY_SIZE) {
-            updatedMessages = updatedMessages.subList(
-                updatedMessages.size() - CONTEXT_HISTORY_SIZE,
-                updatedMessages.size()
+    
+        // Si el mensaje es de cualquier entidad (jugador u otro NPC), excepto este NPC específico
+        if (!playerName.equals(this.npc.getName())) {
+            List<ChatMessage> playerMessages = globalChatHistory.computeIfAbsent(
+                playerName, 
+                k -> new ArrayList<>()
             );
+    
+            // Verificar si el mensaje ya existe
+            boolean isDuplicate = playerMessages.stream()
+                .anyMatch(chatMessage -> 
+                    chatMessage.getMessage().equals(message) && 
+                    (currentTime - chatMessage.getTimestamp()) <= 30000 // Solo considera duplicados en los últimos 30 segundos
+                );
+    
+            if (!isDuplicate) {
+                // Añadir mensaje al historial global con timestamp
+                playerMessages.add(new ChatMessage(playerName, message, currentTime));
+    
+                // Limpiar mensajes antiguos solo para este jugador/NPC
+                List<ChatMessage> updatedMessages = playerMessages.stream()
+                    .filter(chatMessage -> (currentTime - chatMessage.getTimestamp()) <= 30000)
+                    .collect(Collectors.toList());
+                
+                // Mantener límite de tamaño
+                if (updatedMessages.size() > CONTEXT_HISTORY_SIZE) {
+                    updatedMessages = updatedMessages.subList(
+                        updatedMessages.size() - CONTEXT_HISTORY_SIZE,
+                        updatedMessages.size()
+                    );
+                }
+                
+                globalChatHistory.put(playerName, updatedMessages);
+            }
         }
-        
-        globalChatHistory.put(playerName, updatedMessages);
     }
 
     private void updateContext() {
@@ -233,7 +192,7 @@ que accion tomas? responde solo con la accion";""".formatted(context.getContextS
                             player.sendMessage("<" + npc.getName() + "> " + details);
                         }
                     });
-                    context.addToHistory("NPC dijo: " + details);
+                    context.addToHistory(npc.getName()+ " dijo: " + details);
                     break;
 
                 case SEGUIR:
@@ -241,7 +200,7 @@ que accion tomas? responde solo con la accion";""".formatted(context.getContextS
                     if (followTarget != null) {
                         npc.getNavigator().setTarget(followTarget, true);
                         npc.getNavigator().getDefaultParameters().speedModifier(3.5f);
-                        context.addToHistory("NPC está siguiendo a " + aiResponse.getTarget());
+                        context.addToHistory(npc.getName()+ " está siguiendo a " + aiResponse.getTarget());
                     }
                     break;
 
@@ -249,7 +208,7 @@ que accion tomas? responde solo con la accion";""".formatted(context.getContextS
                     Player greetTarget = Bukkit.getPlayer(aiResponse.getTarget());
                     if (greetTarget != null) {
                         String greeting = "¡Hola " + aiResponse.getTarget() + "!";       
-                        context.addToHistory("NPC saludó a " + aiResponse.getTarget());
+                        context.addToHistory(npc.getName()+" saludó a " + aiResponse.getTarget());
                         greetTarget.sendMessage("<" + npc.getName() + "> " + greeting);
                     }
                     break;
@@ -259,8 +218,8 @@ que accion tomas? responde solo con la accion";""".formatted(context.getContextS
                     
                     if (targetLoc != null) {
                         npc.getNavigator().setTarget(targetLoc);
-                        npc.getNavigator().getDefaultParameters().speedModifier(1.0f);
-                        context.addToHistory("NPC está caminando hacia " + aiResponse.getDirection() 
+                        npc.getNavigator().getDefaultParameters().speedModifier(3.0f);
+                        context.addToHistory(npc.getName() + " está caminando hacia " + aiResponse.getDirection() 
                                             + " por " + aiResponse.getDistance() + " bloques");
                     }
                     break;
