@@ -61,8 +61,13 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     private void registerTrait() {
+        Boolean exist = !CitizensAPI.getTraitFactory().getRegisteredTraits().stream().noneMatch(trait -> trait.getTraitClass().equals(NPCAI.class));
         try {
-            if (CitizensAPI.getTraitFactory() != null) {
+            if (CitizensAPI.getTraitFactory() != null  ) {
+                if (exist) {
+                    getLogger().info("Trait LLMAI ya está registrado!");
+                    return;
+                }
                 CitizensAPI.getTraitFactory().registerTrait(
                     TraitInfo.create(NPCAI.class).withName("llmai")
                 );

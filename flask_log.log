@@ -1,0 +1,61 @@
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with watchdog (windowsapi)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 141-399-759
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:44:29] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:44:30] "GET /socket.io/?EIO=4&transport=polling&t=PD5JwxO HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:44:30] "POST /socket.io/?EIO=4&transport=polling&t=PD5Jwzd&sid=Vpm1gb-kYaWhTuLAAAAA HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:44:30] "GET /socket.io/?EIO=4&transport=polling&t=PD5Jwzf&sid=Vpm1gb-kYaWhTuLAAAAA HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:44:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:44:30] "GET /socket.io/?EIO=4&transport=polling&t=PD5Jw_2&sid=Vpm1gb-kYaWhTuLAAAAA HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in 'C:\\Python312\\Lib\\site-packages\\transformers\\models\\clip\\modeling_clip.py', reloading
+INFO:werkzeug: * Restarting with watchdog (windowsapi)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 141-399-759
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:46:16] "GET /socket.io/?EIO=4&transport=polling&t=PD5KCgN HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:46:16] "GET /socket.io/?EIO=4&transport=polling&t=PD5KIGM HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:46:16] "POST /socket.io/?EIO=4&transport=polling&t=PD5KKx0&sid=uE7Vvhvn1U9O9bneAAAB HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:46:16] "GET /socket.io/?EIO=4&transport=polling&t=PD5KKx1&sid=uE7Vvhvn1U9O9bneAAAB HTTP/1.1" 200 -
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with watchdog (windowsapi)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 141-399-759
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:48:37] "GET /socket.io/?EIO=4&transport=polling&t=PD5KmZp HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:48:37] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:48:37] "GET /socket.io/?EIO=4&transport=polling&t=PD5Ksgn HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:48:37] "GET /socket.io/?EIO=4&transport=polling&t=PD5KtHy HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:48:37] "POST /socket.io/?EIO=4&transport=polling&t=PD5KtKB&sid=gS7BAL0jTElGp9xGAAAC HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:48:37] "GET /socket.io/?EIO=4&transport=polling&t=PD5KtKC&sid=gS7BAL0jTElGp9xGAAAC HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:48:37] "GET /socket.io/?EIO=4&transport=polling&t=PD5KtNr&sid=gS7BAL0jTElGp9xGAAAC HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in 'e:\\Proyectos Varios\\Editar Imagenes\\app.py', reloading
+INFO:werkzeug: * Detected change in 'e:\\Proyectos Varios\\Editar Imagenes\\app.py', reloading
+INFO:werkzeug: * Detected change in 'e:\\Proyectos Varios\\Editar Imagenes\\app.py', reloading
+INFO:werkzeug: * Restarting with watchdog (windowsapi)
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with watchdog (windowsapi)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 141-399-759
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:55:53] "GET /socket.io/?EIO=4&transport=polling&t=PD5MTAa HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:55:53] "POST /socket.io/?EIO=4&transport=polling&t=PD5MXe4&sid=0h9WyLoY_RCKPVRXAAAA HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 17:55:53] "GET /socket.io/?EIO=4&transport=polling&t=PD5MXe5&sid=0h9WyLoY_RCKPVRXAAAA HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in 'e:\\Proyectos Varios\\Editar Imagenes\\app.py', reloading
+INFO:werkzeug: * Detected change in 'e:\\Proyectos Varios\\Editar Imagenes\\app.py', reloading
+INFO:werkzeug: * Detected change in 'e:\\Proyectos Varios\\Editar Imagenes\\app.py', reloading
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with watchdog (windowsapi)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 141-399-759
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 18:00:28] "GET /socket.io/?EIO=4&transport=polling&t=PD5NW63 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 18:00:28] "POST /socket.io/?EIO=4&transport=polling&t=PD5Nasb&sid=6phsunDnM1qugfGlAAAA HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 18:00:28] "GET /socket.io/?EIO=4&transport=polling&t=PD5Nasc&sid=6phsunDnM1qugfGlAAAA HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 18:00:28] "GET /socket.io/?EIO=4&transport=polling&t=PD5Naso&sid=6phsunDnM1qugfGlAAAA HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 18:00:28] "POST /socket.io/?EIO=4&transport=polling&t=PD5Nask&sid=6phsunDnM1qugfGlAAAA HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Nov/2024 18:01:21] "GET /socket.io/?EIO=4&transport=websocket&sid=6phsunDnM1qugfGlAAAA HTTP/1.1" 200 -

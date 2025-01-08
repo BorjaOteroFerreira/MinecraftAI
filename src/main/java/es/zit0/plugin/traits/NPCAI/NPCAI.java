@@ -1,10 +1,10 @@
 package es.zit0.plugin.traits.NPCAI;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+
 import es.zit0.plugin.Main;
 import es.zit0.plugin.ai.LLMResponse;
 import es.zit0.plugin.ai.LLMQueryService;
 import es.zit0.plugin.chat.ChatMessage;
+import es.zit0.plugin.traits.NPCAI.agents.Agent;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.api.trait.TraitName;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
@@ -38,7 +38,7 @@ public class NPCAI extends Trait {
 
     @Override
     public void onSpawn() {
-        plugin.getLogger().info("NPC " + npc.getName() + " con trait LLMAI ha aparecido.");
+        plugin.getLogger().info("NPC " + npc.getName() + " con IA ha aparecido.");
         isActive = true;
         this.context = new NPCContext(globalChatHistory, super.getName()); 
         context.setCurrentActivity("Recién spawneado");
@@ -66,29 +66,14 @@ public class NPCAI extends Trait {
             int maxRetries = 1;
             for (int retry = 0; retry < maxRetries; retry++) {
                 try {
-                    String systemPrompt = """
-Eres un %s en Minecraft llamado %s y tienes que tomar decisiones.
-IMPORTANTE: DEBES RESPONDER ÚNICAMENTE CON UNA DE ESTAS ACCIONES:
-SEGUIR <jugador>
-HABLAR <mensaje>
-CAMINAR <dirección> <número_entero>
-Direcciones válidas: north, south, east, west, northeast, northwest, southeast, southwest,  el numero de bloques a desplazarte es un entero
-Si no hay jugadores o no sabes qué hacer, caminar para buscar gente en la direccion que te apetezca. 
-NO PUEDE EXISTIR TEXTO ADICIONAL ANTES NI DESPUES DE LA ACCION; NO EXPLIQUES TU RAZONAMIENTO SOLO RESPONDE CON LA ACCION
-SI LA CONVERSACION ES REPETITIVA NO HABLES.
-NO ESCRIBAS NADA MÁS. SOLO LA ACCIÓN.
-NO DES EXPLICACIONES. 
-NO USES OTROS FORMATOS.
-RESPONDE SOLO CON LA ACCIÓN.""".formatted(npc.getEntity().getType().toString(), npc.getName());
-                                           
-
+                    String systemPrompt = Agent.explorerAgent(npc.getEntity().getType().toString(), npc.getName());
                     String userContext = """
-esto es informacion del entorno : 
+esto es informacion del entorno: 
 %s
 Puedes mantener conversaciones gracias al historial de mensajes recientes de jugadores cercanos.
 que accion tomas? responde solo con la accion";""".formatted(context.getContextString());
                
-                    Thread.sleep(6000); // Exponential backoff
+                    Thread.sleep(6000); //  backoff exponencial
                     return LLMQueryService.builder()
                         .systemPrompt(systemPrompt)
                         .userContext(userContext)
@@ -96,16 +81,16 @@ que accion tomas? responde solo con la accion";""".formatted(context.getContextS
                 } catch (Exception e) {
                     plugin.getLogger().warning("Reintento " + (retry + 1) + " fallido: " + e.getMessage());
                     if (retry == maxRetries - 1) {
-                        return "HABLAR algo salio mal"; // Fallback action
+                        return "HABLAR algo salio mal"; // Fallback 
                     }
                     try {
-                        Thread.sleep(6000 * (retry + 1)); // Exponential backoff
+                        Thread.sleep(6000 * (retry + 1)); //  backoff Exponencial
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
                 }
             }
-            return "HABLAR algo salio mal"; // Fallback action
+            return "HABLAR algo salio mal"; // Fallback 
         }).thenAccept(response -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 handleLLMResponse(response);
@@ -228,34 +213,16 @@ que accion tomas? responde solo con la accion";""".formatted(context.getContextS
 
     private Location calculateTargetLocation(Location currentLoc, String direction, double distance) {
         Location targetLoc = currentLoc.clone();
-        
         switch (direction) {
-            case "north":
-                targetLoc.add(0, 0, -distance);
-                break;
-            case "south":
-                targetLoc.add(0, 0, distance);
-                break;
-            case "east":
-                targetLoc.add(distance, 0, 0);
-                break;
-            case "west":
-                targetLoc.add(-distance, 0, 0);
-                break;
-            case "northeast":
-                targetLoc.add(distance * 0.707, 0, -distance * 0.707); // 0.707 es aproximadamente √2/2
-                break;
-            case "northwest":
-                targetLoc.add(-distance * 0.707, 0, -distance * 0.707);
-                break;
-            case "southeast":
-                targetLoc.add(distance * 0.707, 0, distance * 0.707);
-                break;
-            case "southwest":
-                targetLoc.add(-distance * 0.707, 0, distance * 0.707);
-                break;
-            default: 
-                return null;
+            case "north": targetLoc.add(0, 0, -distance); break;
+            case "south": targetLoc.add(0, 0, distance); break;
+            case "east": targetLoc.add(distance, 0, 0); break;
+            case "west": targetLoc.add(-distance, 0, 0); break;
+            case "northeast": targetLoc.add(distance * 0.707, 0, -distance * 0.707); break; // 0.707 es aproximadamente √2/2
+            case "northwest": targetLoc.add(-distance * 0.707, 0, -distance * 0.707); break;
+            case "southeast": targetLoc.add(distance * 0.707, 0, distance * 0.707);  break;
+            case "southwest": targetLoc.add(-distance * 0.707, 0, distance * 0.707); break;
+            default: return null;
         }
         return targetLoc;
     }
